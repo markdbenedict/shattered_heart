@@ -13,6 +13,7 @@ import scipy.stats as stats
 biomes = {  'water':(0.3,0.4,0.7),
             'land':(238/255.0,207/255.0,161/255.0),
             'mountain':(139/255.0,90/255.0,0),
+            'high_mountain':(0.9,0.9,0.9),
             'hill':(0.4,0.4,0.3),
             'lake':(0.3,0.4,0.95),
             'river':(0.3,0.5,0.6),
@@ -48,13 +49,22 @@ class WorldCreator():#ShowBase):
         self.camera.setHpr(angleDegrees,0,0)
         return Task.cont
     
-    def createPangea(self, numCells=500):
-        np.random.seed(seed=1234)
-        random.seed(1234)
+    def createPangea(self, numCells=500,relax=0):
+        
         x = np.random.random(numCells)
         y = np.random.random(numCells)
         
         self.vg = VoronoiGraph(zip(x,y))
+        #perform relax steps of Lloyd relaxation
+        for i in range(relax):
+            x=np.zeros(numCells)
+            y=np.zeros(numCells)
+            for i,cell in enumerate(self.vg.cells):
+                x[i]=np.mean(cell.vertices[:,0])
+                y[i]=np.mean(cell.vertices[:,1])
+            self.vg = VoronoiGraph(zip(x,y))
+        
+        # use this graph to perform Lloyd relaxtion an generate new graphy
         for cell in self.vg.cells:
             cell.name = 'land'
             cell.elevation = 1
@@ -123,27 +133,48 @@ class WorldCreator():#ShowBase):
         numMtnCells = int(mountainRatio*self.vg.N)
         totalMountains = 0
         while totalMountains < numMtnCells:
-            start_cell = self.vg.cells[379]#random.choice(self.vg.cells)
-            start_cell.increase_elevation(1)
-            #pick a direction for the fault line
-            direction = 2*np.pi*np.random.rand() #direction in radians
-            #propagate the mountain chain along this direction as much as possible
-            for i in range(stats.poisson.rvs(meanSize)):
-                #calculate the directions to neighbors and pick one closest to Dir
-                closestDir = self.vg.closestNeighborInDirection(start_cell,direction)
-                print closestDir
-                nextInChain = self.vg.cells[start_cell.neighbors[closestDir]] 
-                nextInChain.increase_elevation(1)
-                totalMountains+=1
-                start_cell = nextInChain
-            #now elevate all surrounding terrain
-        
+            start_cell = random.choice(self.vg.cells)
+            if start_cell.name=='land' or  start_cell.name=='high_mountain':
+                start_cell.name = 'high_mountain'
+                start_cell.color = biomes[start_cell.name]
+                #pick a direction for the fault line
+                direction = 2*np.pi*np.random.rand() #direction in radians
+                #propagate the mountain chain along this direction as much as possible
+                for i in range(stats.poisson.rvs(meanSize)):
+                    #calculate the directions to neighbors and pick one closest to Dir
+                    closestDir = self.vg.closestNeighborInDirection(start_cell,direction)
+                    nextInChain = self.vg.cells[start_cell.neighbors[closestDir]] 
+                    nextInChain.name = 'high_mountain'
+                    nextInChain.color = biomes[nextInChain.name]
+                    totalMountains+=1
+                    start_cell = nextInChain
+        #now elevate all surrounding terrain
+        for cell in self.vg.cells:
+            if cell.name=='high_mountain':
+                #elevate all non mountain neighbors
+                for i in cell.neighbors:
+                    neighbor = self.vg.cells[i]
+                    neighbor.increase_elevation(1)   
     
     def createRivers(self, riverRatio):
         pass
     
-    def createForests(self, forestRatio):
-        pass
+    def createForests(self, forestRatio,meanSize=2):
+        numForestCells = int(forestRatio*self.vg.N)
+        totalForests = 0
+        while totalForests < numForestCells:
+            start_cell = random.choice(self.vg.cells)
+            if start_cell.name=='land' or  start_cell.name=='forest':
+                start_cell.name = 'forest'
+                start_cell.color = biomes[start_cell.name]
+                totalForests+=1
+                #grow forests radially from start_cell
+                for i in start_cell.neighbors:
+                    neighbor = self.vg.cells[i]
+                    if neighbor.name =='land':
+                        neighbor.name = 'forest'
+                        neighbor.color=biomes[neighbor.name]
+                        totalForests+=1
     
     def createDeserts(self, desertRatio):
         pass
@@ -163,13 +194,16 @@ class WorldCreator():#ShowBase):
     
 if __name__ == "__main__":
     app = WorldCreator()
-    
-    app.createPangea(numCells=1900)
+    seed=1234
+    np.random.seed(seed=seed)
+    random.seed(seed)
+    app.createPangea(numCells=1260,relax=1)
     app.createOceans()
-    app.createLakes(lakeRatio=0.01,meanSize=2)
+    #app.createLakes(lakeRatio=0.01,meanSize=2)
+    app.createForests(forestRatio=0.09)
     app.createArtic()
     app.erodeTinyIslands()
-    app.createMountains(mountainRatio=0.04,meanSize=4)
+    app.createMountains(mountainRatio=0.015,meanSize=6)
     
     app.vg.draw_voronoi(app.ax)
     

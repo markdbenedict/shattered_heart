@@ -13,6 +13,7 @@ from voronoicell import VoronoiCell
 biomes = {  'water':(0.3,0.4,0.7),
             'land':(238/255.0,207/255.0,161/255.0),
             'mountain':(139/255.0,90/255.0,0),
+            'high_mountain':(0.9,0.9,0.9),
             'hill':(0.4,0.4,0.3),
             'lake':(0.3,0.4,0.95),
             'river':(0.3,0.5,0.6),

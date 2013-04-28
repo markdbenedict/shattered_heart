@@ -5,7 +5,8 @@ import matplotlib.nxutils as nx
 biomes = {  'water':(0.3,0.4,0.7),
             'land':(238/255.0,207/255.0,161/255.0),
             'mountain':(139/255.0,90/255.0,0),
-            'hill':(0.,0.,0.),
+            'high_mountain':(0.9,0.9,0.9),
+            'hill':(0.4,0.4,0.3),
             'lake':(0.3,0.4,0.95),
             'river':(0.3,0.5,0.6),
             'forest':(110/255.0,139/255.0,61/255.0),
@@ -37,16 +38,17 @@ class VoronoiCell():
         return patch
     
     def increase_elevation(self, increment):    
-        self.elevation+=increment
         if self.name == 'water':
             self.name = 'land'
+            self.elevation+=increment
         if self.name == 'lake':
             self.name = 'land'
+            self.elevation+=increment
         elif self.name == 'land':
-            self.name = 'hill'
-        elif self.name == 'hill':
             self.name = 'mountain'
+            self.elevation+=increment
         self.color = biomes[self.name]
+        
 
                  
             
