@@ -13,12 +13,12 @@ import scipy.stats as stats
 biomes = {  'water':(0.3,0.4,0.7),
             'land':(238/255.0,207/255.0,161/255.0),
             'mountain':(139/255.0,90/255.0,0),
-            'high_mountain':(0.9,0.9,0.9),
+            'high_mountain':(0.9,0.85,0.85),
             'hill':(0.4,0.4,0.3),
             'lake':(0.3,0.4,0.95),
             'river':(0.3,0.5,0.6),
             'forest':(110/255.0,139/255.0,61/255.0),
-            'arctic':(0.9,0.9,0.9),
+            'arctic':(0.95,0.95,0.95),
             'desert':(0.6,0.9,0.9)}
 
 class WorldCreator():#ShowBase):
@@ -53,15 +53,18 @@ class WorldCreator():#ShowBase):
         
         x = np.random.random(numCells)
         y = np.random.random(numCells)
-        
-        self.vg = VoronoiGraph(zip(x,y))
+        sites = zip(x,y)
+        sites.sort()
+        self.vg = VoronoiGraph(sites)
         #perform relax steps of Lloyd relaxation
         for i in range(relax):
             x=np.zeros(numCells)
             y=np.zeros(numCells)
-            for i,cell in enumerate(self.vg.cells):
-                x[i]=np.mean(cell.vertices[:,0])
-                y[i]=np.mean(cell.vertices[:,1])
+            for j,cell in enumerate(self.vg.cells):
+                x[j]=np.mean(cell.vertices[:,0])
+                y[j]=np.mean(cell.vertices[:,1])
+            sites2=zip(x,y)
+            sites2.sort()
             self.vg = VoronoiGraph(zip(x,y))
         
         # use this graph to perform Lloyd relaxtion an generate new graphy
@@ -98,7 +101,8 @@ class WorldCreator():#ShowBase):
             island = True
             #check for a land neighbor
             for neigh in cell.neighbors:
-                if self.vg.cells[neigh].name == 'land':
+                theName = self.vg.cells[neigh].name
+                if theName != 'water':
                     island = False #its not a size one island
             if island:
                 cell.color = biomes['water']
@@ -176,6 +180,7 @@ class WorldCreator():#ShowBase):
                         neighbor.color=biomes[neighbor.name]
                         totalForests+=1
     
+    
     def createDeserts(self, desertRatio):
         pass
     
@@ -194,24 +199,20 @@ class WorldCreator():#ShowBase):
     
 if __name__ == "__main__":
     app = WorldCreator()
-    seed=1234
+    seed=3234
     np.random.seed(seed=seed)
     random.seed(seed)
-    app.createPangea(numCells=1260,relax=1)
+    app.createPangea(numCells=6000,relax=1)
     app.createOceans()
-    #app.createLakes(lakeRatio=0.01,meanSize=2)
-    app.createForests(forestRatio=0.09)
-    app.createArtic()
-    app.erodeTinyIslands()
-    app.createMountains(mountainRatio=0.015,meanSize=6)
+    app.createMountains(mountainRatio=0.012,meanSize=12)
+    app.createForests(forestRatio=0.07)
+    app.createLakes(lakeRatio=0.01,meanSize=4)
     
+    #app.createArtic()
+    app.erodeTinyIslands()    
     app.vg.draw_voronoi(app.ax)
     
-    x = [ val[0] for val in app.vg.delaunay.points]
-    y = [ val[1] for val in app.vg.delaunay.points]
-    #app.vg._draw_cell_ids(app.ax)
-    #app.vg.draw_delaunay(app.ax)
-    #app.ax.plot(x,y,'ro',markersize=5)
+
     plt.xlim(0,1)
     plt.ylim(0,1)
     plt.show()

@@ -2,15 +2,16 @@ import matplotlib.patches as mpatches
 import numpy as np
 import matplotlib.nxutils as nx
 
+
 biomes = {  'water':(0.3,0.4,0.7),
             'land':(238/255.0,207/255.0,161/255.0),
             'mountain':(139/255.0,90/255.0,0),
-            'high_mountain':(0.9,0.9,0.9),
+            'high_mountain':(0.9,0.85,0.85),
             'hill':(0.4,0.4,0.3),
             'lake':(0.3,0.4,0.95),
             'river':(0.3,0.5,0.6),
             'forest':(110/255.0,139/255.0,61/255.0),
-            'arctic':(0.9,0.9,0.9),
+            'arctic':(0.95,0.95,0.95),
             'desert':(0.6,0.9,0.9)}
 
 class VoronoiCell():
@@ -32,9 +33,8 @@ class VoronoiCell():
         return nx.pnpoly(x,y,self.vertices)
     
     def draw(self):
-        patch = mpatches.Polygon(self.vertices,facecolor = self.color)
+        patch = mpatches.Polygon(self.vertices,ec='none',facecolor = self.color)
         patch.set_picker(True)
-        #print self.color
         return patch
     
     def increase_elevation(self, increment):    

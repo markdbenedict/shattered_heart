@@ -4,48 +4,62 @@ from matplotlib import collections
 import matplotlib.patches as mpatches
 import random
 
-from pyhull.delaunay import DelaunayTri
-from pyhull.convex_hull import ConvexHull
-from pyhull.voronoi import VoronoiTess
+#from pyhull.delaunay import DelaunayTri
+#from pyhull.convex_hull import ConvexHull
+#from pyhull.voronoi import VoronoiTess
 
 from voronoicell import VoronoiCell
+
+from delaunay import Delaunay
+from delaunay import Triangle
+from delaunay import ConvexHull
+from voronoi import Voronoi
+
 
 biomes = {  'water':(0.3,0.4,0.7),
             'land':(238/255.0,207/255.0,161/255.0),
             'mountain':(139/255.0,90/255.0,0),
-            'high_mountain':(0.9,0.9,0.9),
+            'high_mountain':(0.9,0.85,0.85),
             'hill':(0.4,0.4,0.3),
             'lake':(0.3,0.4,0.95),
             'river':(0.3,0.5,0.6),
             'forest':(110/255.0,139/255.0,61/255.0),
-            'arctic':(0.9,0.9,0.9),
+            'arctic':(0.95,0.95,0.95),
             'desert':(0.6,0.9,0.9)}
-
 class VoronoiGraph():
     def __init__(self,point_array):
-        self.hull = ConvexHull(point_array)
-        self.delaunay = DelaunayTri(point_array)
-        self.vor = VoronoiTess(point_array)
+        self.hull = ConvexHull(point_array).hull_points
+        #self.delaunay = DelaunayTri(point_array)
+        #self.vor = VoronoiTess(point_array)
+        self.delaunay = Delaunay(point_array)
+        self.vor = Voronoi(self.delaunay)
         self.N = len(self.vor.regions)
+        self.hull_points = []
+        for point in self.hull:
+            self.hull_points.append(self.vor.points.index(point))
         
-        self.hull_points = [a[0] for a in self.hull.vertices]
         self.interior_points = set(range(self.N))
-        for point in self.hull_points:
+        for point in self.hull:
             self.interior_points.discard(point)
         
         #create a position dependant list of VoronoiCells
-        adj_list = self._create_adj_matrix()
+        #adj_list = self._create_adj_matrix() # only needed in pyhull version
         self.cells = []
         for i in range(self.N):
             theCell = VoronoiCell()
             theCell.id = i
             theCell.center = self.vor.points[i]
-            cleanVerts = list(self.vor.regions[i])
-            if 0 in cleanVerts: cleanVerts.remove(0)
-            theVerts = np.array([self.vor.vertices[vert] for vert in cleanVerts])
+            cleanVerts = list(self.vor.regions[i]) #list of indices into vetex array
+            points = []
+            for vertexIndex in cleanVerts:
+                points.append(self.vor.vertices[vertexIndex].tolist())
+            #if 0 in cleanVerts: cleanVerts.remove(0)
+            #if len(points)>2: #figure out where this isnt true
+            orderedVertices = ConvexHull(points).hull_points
+            theVerts = np.array(orderedVertices)#[self.vor.vertices[vert] for vert in cleanVerts])
             theCell.vertices = theVerts
-            theCell.neighbors = list(adj_list[i])
-            if i in self.hull_points:
+            theCell.neighbors = list(self.vor.neighbors[i])
+            if theCell.center in self.hull:
                 theCell.hull_point = True
             self.cells.append(theCell)
 
