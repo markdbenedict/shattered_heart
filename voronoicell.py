@@ -50,6 +50,7 @@ class VoronoiCell():
             self.elevation+=increment
         self.color = biomes[self.name]
         
-
+    def __lt__(self, other):
+         return self.center[1] < other.center[1]
                  
             

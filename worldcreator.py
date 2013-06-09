@@ -1,10 +1,9 @@
 from math import pi,sin,cos
-
 from voronoigraph import VoronoiGraph
 import matplotlib.pyplot as plt
 import numpy as np
 import random
-
+import operator
 import scipy.stats as stats
 
 biomes = {  'water':(0.3,0.4,0.7),
@@ -151,10 +150,10 @@ class WorldCreator():
         pass
     
     def createForests(self, forestRatio,meanSize=2):
-        numForestCells = int(forestRatio*self.vg.N)
+        numForestCells = int(forestRatio*self.vg.N) #self.vg.n is number of total cells
         totalForests = 0
         while totalForests < numForestCells:
-            start_cell = random.choice(self.vg.cells)
+            start_cell = random.choice(self.vg.cells) #this is where list of all cells comes from
             if start_cell.name=='land' or  start_cell.name=='forest':
                 start_cell.name = 'forest'
                 start_cell.color = biomes[start_cell.name]
@@ -171,8 +170,49 @@ class WorldCreator():
     def createDeserts(self, desertRatio):
         pass
     
-    def createArtic(self, articRatio=0.05):
-        pass
+    def createArctic(self, arcticRatio=0.05):
+        numArcticCells = int(arcticRatio*self.vg.N)
+        totalArctic = 0
+        while totalArctic < numArcticCells:
+            start_cell = random.choice(self.vg.cells)
+            polar = (start_cell.center[1]>0.8) or (start_cell.center[1]<0.2)
+            if start_cell.name=='land' and polar:
+                start_cell.name ='arctic'
+                start_cell.color = biomes[start_cell.name]
+                totalArctic+=1
+                for i in start_cell.neighbors:
+                    neighbor = self.vg.cells[i]
+                    if neighbor.name =='land':
+                        neighbor.name = 'arctic'
+                        neighbor.color=biomes[neighbor.name]
+                        totalArctic+=1
+    
+    def createArctic_v2(self, arcticRatio=0.05):
+        land_list=[]
+        
+        for cell in self.vg.cells:
+            if cell.name=='land':
+                land_list.append(cell)
+        
+        land_list.sort()
+        
+        numArcticCells = int(arcticRatio*self.vg.N)/2
+        totalArctic = 0
+        #Southern 
+        while totalArctic < numArcticCells:
+            start_cell=land_list[totalArctic]
+            start_cell.name ='arctic'
+            start_cell.color = biomes[start_cell.name]
+            totalArctic+=1
+        totalArctic = 0
+        #Northern from the back of the list    
+        while totalArctic < numArcticCells:
+            start_cell = land_list[-1 - totalArctic]
+            start_cell.name ='arctic'
+            start_cell.color = biomes[start_cell.name]
+            totalArctic+=1
+            
+            
     
     def on_pick(self, event):
         print 'in pick'
@@ -189,13 +229,13 @@ if __name__ == "__main__":
     seed=3234
     np.random.seed(seed=seed)
     random.seed(seed)
-    app.createPangea(numCells=6000,relax=1)
+    app.createPangea(numCells=1200,relax=1)
     app.createOceans()
-    app.createMountains(mountainRatio=0.012,meanSize=12)
+    app.createMountains(mountainRatio=0.01,meanSize=8)
     app.createForests(forestRatio=0.07)
     app.createLakes(lakeRatio=0.01,meanSize=4)
     
-    #app.createArtic()
+    app.createArctic_v2(arcticRatio=0.05)
     app.erodeTinyIslands()    
     app.vg.draw_voronoi(app.ax)
     

@@ -88,7 +88,7 @@ if __name__ == "__main__":
     pixmap = QtGui.QPixmap("risk.jpg")
     splash = QtGui.QSplashScreen(pixmap)
     splash.show()
-    time.sleep(.2)
+    time.sleep(2)
     splash.close()
     
     riskWin = RiskGUI(world.vg)    
