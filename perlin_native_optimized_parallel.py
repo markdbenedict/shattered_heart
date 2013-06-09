@@ -1,0 +1,71 @@
+import random
+import math
+import numpy as np
+from IPython.parallel import Client
+
+
+def parallel_eval(n):
+    i = n%2
+    j = n/2
+    import numpy
+    gridX,gridY = intX+i, intY+j
+    distX, distY = abs(floatX-gridX), abs(floatY-gridY) #distX, distY must never get larger than 1
+                
+    polyX = 1 - 6*distX**5 + 15*distX**4 - 10*distX**3
+    polyY = 1 - 6*distY**5 + 15*distY**4 - 10*distY**3
+                
+    hashed = perm[perm[gridX%per] + gridY%per]
+    grad = (floatX-gridX)*dirs[hashed,0] + (floatY-gridY)*dirs[hashed,1]
+    return polyX * polyY * grad 
+    
+def noise(freq,octs,size):
+    #setup parallel env
+    c = Client()
+    dview=c[:]
+    #setup randomized hash table of directions
+    perm = np.arange(size)
+    np.random.shuffle(perm)
+    perm = np.concatenate([perm,perm])
+    dirs = [(math.cos(a * 2.0 * math.pi / size),
+             math.sin(a * 2.0 * math.pi / size))
+             for a in range(size)]
+    dirs = np.array(dirs)
+
+    valFBM = np.zeros((size,size))
+    for o in range(octs):
+        per = int(size*freq*2**o)
+        val = np.zeros((size,size))
+        X = np.arange(size)* 2**o
+        X = X.reshape(size,1)
+        Y = np.arange(size) * 2**o
+        Y = Y.reshape(1,size)
+        floatX = X*freq
+        floatY = Y*freq
+        intX = floatX.astype(np.int32)
+        intY = floatY.astype(np.int32)
+        
+        data =[]
+        dview.push({'intX':intX,'floatX':floatX,'intY':intY,'floatY':floatY,
+                    'per':per,'perm':perm,'dirs':dirs})
+        data = dview.map_sync(parallel_eval,range(4))
+        for item in data:
+            val+=item
+        
+        valFBM += 0.5**o * val
+        
+    return valFBM
+
+
+
+
+def test_perlin(size = 1024,display=True,octs=2,freq=1/32.0):
+    data=noise(freq, octs,size)
+    
+    if display:
+        from matplotlib import pyplot as plt
+        plt.imshow(data)#,cmap='gray')
+        plt.colorbar()
+        plt.show()
+
+if __name__ == '__main__':
+    test_perlin(size=256,display=True)

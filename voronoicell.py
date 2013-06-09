@@ -1,6 +1,6 @@
 import matplotlib.patches as mpatches
 import numpy as np
-import matplotlib.nxutils as nx
+from matplotlib.path import Path
 
 
 biomes = {  'water':(0.3,0.4,0.7),
@@ -12,25 +12,26 @@ biomes = {  'water':(0.3,0.4,0.7),
             'river':(0.3,0.5,0.6),
             'forest':(110/255.0,139/255.0,61/255.0),
             'arctic':(0.95,0.95,0.95),
-            'desert':(0.6,0.9,0.9)}
+            'desert':(0.6,0.9,0.9),
+            'select':(0.5,0.9,0.9)}
 
 class VoronoiCell():
     def __init__(self):
         self.id=-1
         self.neighbors = []
+        self.path = None
         self.vertices = np.array((np.inf,np.inf))
         self.center = np.array((np.inf,np.inf))
         self.hull_point=False
         self.color = (0.5,0.7,0.7)#np.random.rand(3)
         self.elevation = 0
         self.name = None
-
-    def neighbors(self):
-        pass
+        self.value = 0
 
     #find the VoronoiCell containg (x,y)
-    def contains(self,x,y):
-        return nx.pnpoly(x,y,self.vertices)
+    def contains(self,pos):
+        self.path = Path(self.vertices)
+        return self.path.contains_point(pos)
     
     def draw(self):
         patch = mpatches.Polygon(self.vertices,ec='none',facecolor = self.color)

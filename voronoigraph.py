@@ -108,6 +108,10 @@ class VoronoiGraph():
         closestDir = a.argmin()
         return closestDir    
 
+    def draw_armies(self,mpl_axis,cells):
+        for cell in cells:
+            mpl_axis.text(cell.center[0],cell.center[1],str(cel.value))
+
     #internal function to create adjancey lists for dealunay graph
     #1:1 correspondence between vor.region index and delaunay.points
     def _create_adj_matrix(self):

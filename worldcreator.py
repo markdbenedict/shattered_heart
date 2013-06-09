@@ -1,8 +1,5 @@
 from math import pi,sin,cos
 
-from direct.showbase.ShowBase import ShowBase
-from direct.task import Task
-
 from voronoigraph import VoronoiGraph
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,22 +16,12 @@ biomes = {  'water':(0.3,0.4,0.7),
             'river':(0.3,0.5,0.6),
             'forest':(110/255.0,139/255.0,61/255.0),
             'arctic':(0.95,0.95,0.95),
-            'desert':(0.6,0.9,0.9)}
+            'desert':(0.6,0.9,0.9),
+            'select':(0.5,0.9,0.9)}
 
-class WorldCreator():#ShowBase):
+class WorldCreator():
     def __init__(self):
-        #ShowBase.__init__(self)
-        #
-        ##load environmental model
-        #self.environ = self.loader.loadModel(
-        #                '/Developer/Panda3D/models/environment')
-        ##reparent the model to the renderer
-        #self.environ.reparentTo(self.render)
-        ##Apply scale and position transforms to the model
-        #self.environ.setScale(0.25,0.25,0.25)
-        #self.environ.setPos(-8,42,0)
-        #
-        #self.taskMgr.add(self.spincameratask, 'spincameratask')
+      
         self.fig = plt.figure()
         self.ax = self.fig.add_axes([0.1,0.1,0.8,0.8])
         self.fig.canvas.mpl_connect('pick_event',self.on_pick)
@@ -67,9 +54,9 @@ class WorldCreator():#ShowBase):
             sites2.sort()
             self.vg = VoronoiGraph(zip(x,y))
         
-        # use this graph to perform Lloyd relaxtion an generate new graphy
-        for cell in self.vg.cells:
+        for i,cell in enumerate(self.vg.cells):
             cell.name = 'land'
+            cell.id=i
             cell.elevation = 1
             cell.color = biomes['land']
         
@@ -212,7 +199,6 @@ if __name__ == "__main__":
     app.erodeTinyIslands()    
     app.vg.draw_voronoi(app.ax)
     
-
     plt.xlim(0,1)
     plt.ylim(0,1)
     plt.show()
