@@ -1,7 +1,5 @@
 from math import pi,sin,cos
 
-from direct.showbase.ShowBase import ShowBase
-from direct.task import Task
 
 from voronoigraph import VoronoiGraph
 import matplotlib.pyplot as plt
@@ -164,10 +162,10 @@ class WorldCreator():#ShowBase):
         pass
     
     def createForests(self, forestRatio,meanSize=2):
-        numForestCells = int(forestRatio*self.vg.N)
+        numForestCells = int(forestRatio*self.vg.N) #self.vg.n is number of total cells
         totalForests = 0
         while totalForests < numForestCells:
-            start_cell = random.choice(self.vg.cells)
+            start_cell = random.choice(self.vg.cells) #this is where list of all cells comes from
             if start_cell.name=='land' or  start_cell.name=='forest':
                 start_cell.name = 'forest'
                 start_cell.color = biomes[start_cell.name]
@@ -184,8 +182,21 @@ class WorldCreator():#ShowBase):
     def createDeserts(self, desertRatio):
         pass
     
-    def createArtic(self, articRatio=0.05):
-        pass
+    def createArctic(self, arcticRatio=0.05):
+        numArcticCells = int(arcticRatio*self.vg.N)
+        totalArctic = 0
+        while totalArctic < numArcticCells:
+            start_cell = random.choice(self.vg.cells)
+            if start_cell.name=='land' or start_cell.name=='arctic':
+                start_cell.name ='arctic'
+                start_cell.color = biomes[start_cell.name]
+                totalArctic+=1
+                for i in start_cell.neighbors:
+                    neighbor = self.vg.cells[i]
+                    if neighbor.name =='land':
+                        neighbor.name = 'arctic'
+                        neighbor.color=biomes[neighbor.name]
+                        totalArctic+=1
     
     def on_pick(self, event):
         print 'in pick'
@@ -202,13 +213,13 @@ if __name__ == "__main__":
     seed=3234
     np.random.seed(seed=seed)
     random.seed(seed)
-    app.createPangea(numCells=6000,relax=1)
+    app.createPangea(numCells=1200,relax=1)
     app.createOceans()
-    app.createMountains(mountainRatio=0.012,meanSize=12)
+    app.createMountains(mountainRatio=0.01,meanSize=8)
     app.createForests(forestRatio=0.07)
     app.createLakes(lakeRatio=0.01,meanSize=4)
     
-    #app.createArtic()
+    app.createArctic(arcticRatio=0.05)
     app.erodeTinyIslands()    
     app.vg.draw_voronoi(app.ax)
     
