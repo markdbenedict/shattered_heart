@@ -35,7 +35,7 @@ class WorldCreator():
         self.camera.setHpr(angleDegrees,0,0)
         return Task.cont
     
-    def createPangea(self, numCells=500,relax=0):
+    def createPangea(self, numCells=500,relax=1):
         
         x = np.random.random(numCells)
         y = np.random.random(numCells)

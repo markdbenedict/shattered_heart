@@ -35,6 +35,7 @@ class VoronoiPlotWidget(FigureCanvas):
      
     def Plot(self):
         if self.vg!=None:
+            self.axes.cla()
             self.vg.draw_voronoi(self.axes)
         self.draw()
     
@@ -57,8 +58,9 @@ class VoronoiPlotWidget(FigureCanvas):
             result = cell.contains(mpl_pos)
             if result == True:
                 print 'found match in cell',cell.id
-                
-                if mouse_down:
+                if self.controller.deployMode and mouse_down:
+                    self.controller.placeTroops(cell)    
+                elif mouse_down:
                     self.cell_from=cell.id
                     cell.color = (0.2,0.9,0.9)
                     for i in cell.neighbors:

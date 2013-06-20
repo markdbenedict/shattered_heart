@@ -27,6 +27,8 @@ class VoronoiCell():
         self.elevation = 0
         self.name = None
         self.value = 0
+        self.owner = -1
+        self.owner_color = (0,0,0)
 
     #find the VoronoiCell containg (x,y)
     def contains(self,pos):
@@ -34,7 +36,11 @@ class VoronoiCell():
         return self.path.contains_point(pos)
     
     def draw(self):
-        patch = mpatches.Polygon(self.vertices,ec='none',facecolor = self.color)
+        if self.owner != -1:
+            color = self.owner_color
+        else:
+            color = self.color
+        patch = mpatches.Polygon(self.vertices,ec='none',facecolor = color)
         patch.set_picker(True)
         return patch
     
