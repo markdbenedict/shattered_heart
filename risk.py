@@ -37,6 +37,7 @@ class RiskGUI(QtGui.QMainWindow):
         self.next_button=self.findChild(QtGui.QPushButton,'NextButton')
         self.next_button.clicked.connect(self.nextTurn)
 
+    #function is called when you click the mouse to assign troops
     def placeTroops(self, cell):
         acceptable = ('arctic','land','forest')
         if (cell.name in acceptable) and (cell.owner in [self.currPlayer,-1] ):
@@ -44,15 +45,31 @@ class RiskGUI(QtGui.QMainWindow):
             cell.value+=1
             cell.owner_color = self.player_list[self.currPlayer]['color']
             self.player_list[self.currPlayer]['unassigned']-=1
-            
-        
     
-    def selectTerritory(self,playerNum): 
+    #function deploys troops for NPC players
+    def selectTerritory(self): 
         #pick properties for each players to put armies on
-        print 'deploying player %i armies'%playerNum
-        self.statusBar().showMessage('Player %s Choosing Territory...'% playerNum)
+        print 'deploying player %i armies'%self.currPlayer
+        self.statusBar().showMessage('Player %s Choosing Territory...'% self.currPlayer)
+        acceptable = ('arctic','land','forest')
         while self.player_list[self.currPlayer]['unassigned'] > 0:
-            self.player_list[self.currPlayer]['unassigned'] -= 1    
+            start_cell = random.choice(self.vg.cells) 
+            if start_cell.name in acceptable:
+                valid = start_cell.owner in [self.currPlayer,-1]
+                if valid:
+                    start_cell.value+=2
+                    start_cell.owner_color = self.player_list[self.currPlayer]['color']
+                    self.player_list[self.currPlayer]['unassigned'] -= 2
+                    for i in start_cell.neighbors:
+                        neighbor = self.vg.cells[i]
+                        valid = neighbor.owner in [self.currPlayer,-1]
+                        if neighbor.name in acceptable and valid:
+                            if self.player_list[self.currPlayer]['unassigned'] > 0:
+                                neighbor.value+=1
+                                neighbor.owner_color = self.player_list[self.currPlayer]['color']
+                                self.player_list[self.currPlayer]['unassigned'] -= 1
+                
+        self.vgwidget.Plot()
         
     def reinforce(self, player):
         pass
@@ -74,8 +91,9 @@ class RiskGUI(QtGui.QMainWindow):
             world.createForests(forestRatio=0.07)
             world.createLakes(lakeRatio=0.01,meanSize=4)
             
-            #world.createArtic()
+            world.createArctic_v2()
             world.erodeTinyIslands()
+            
             self.vg = world.vg
             self.vgwidget.vg=self.vg
             self.vgwidget.controller = self
@@ -101,7 +119,7 @@ class RiskGUI(QtGui.QMainWindow):
                         app.processEvents() #wait until user selects tiles
                 else:
                     self.currPlayer=playerNum
-                    self.selectTerritory(playerNum)
+                    self.selectTerritory()
     
     @QtCore.Slot()
     def nextTurn(self):

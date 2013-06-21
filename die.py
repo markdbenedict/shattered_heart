@@ -1,5 +1,5 @@
 from random import*
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import numpy as np
 
 class Die(object):
@@ -11,13 +11,15 @@ class Die(object):
     
     def drawDie(self):
         pass
-    
-#Tests the die class.
-d = Die(12);
-d.roll()
-print d.roll()
 
-#Graph in progress.
-#plt.plot([d.roll])
-#plt.show()
+if __name__ == "__main__":      
+    #Tests the die class.
+    d = Die(12);
+    sample=[ ]
+    for i in range(10000):
+        sample.append(d.roll())
+    
+    #Graph in progress.
+    plt.hist(sample,bins=12)
+    plt.show()
     

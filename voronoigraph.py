@@ -74,7 +74,8 @@ class VoronoiGraph():
         #draw army text
         for cell in self.cells:
             if cell.value > 0:
-                mpl_axis.text(cell.center[0],cell.center[1],str(cell.value),color=(0,0,0))#cell.owner_color)
+                mpl_axis.text(cell.center[0],cell.center[1],str(cell.value),color=cell.owner_color)
+                print cell.owner_color
       
     def draw_delaunay(self,mpl_axis):
         #plot the delaunay graph, simplices are triangles
