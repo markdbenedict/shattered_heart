@@ -40,11 +40,13 @@ class RiskGUI(QtGui.QMainWindow):
     #function is called when you click the mouse to assign troops
     def placeTroops(self, cell):
         acceptable = ('arctic','land','forest')
-        if (cell.name in acceptable) and (cell.owner in [self.currPlayer,-1] ):
-            cell.owner = self.currPlayer
-            cell.value+=1
-            cell.owner_color = self.player_list[self.currPlayer]['color']
-            self.player_list[self.currPlayer]['unassigned']-=1
+        if (cell.name in acceptable):
+            if cell.changeOwner(self.currPlayer):
+                cell.value+=1
+                cell.owner_color = self.player_list[self.currPlayer]['color']
+                self.player_list[self.currPlayer]['unassigned']-=1
+                if self.player_list[self.currPlayer]['unassigned'] <= 0:
+                    self.deployMode = False
     
     #function deploys troops for NPC players
     def selectTerritory(self): 
@@ -55,17 +57,24 @@ class RiskGUI(QtGui.QMainWindow):
         while self.player_list[self.currPlayer]['unassigned'] > 0:
             start_cell = random.choice(self.vg.cells) 
             if start_cell.name in acceptable:
-                valid = start_cell.owner in [self.currPlayer,-1]
-                if valid:
-                    start_cell.value+=2
+                if start_cell.changeOwner(self.currPlayer):
+                    numArmy = self.player_list[self.currPlayer]['unassigned']
+                    if numArmy > 2:
+                        numArmy = 2
+                    start_cell.value += numArmy
                     start_cell.owner_color = self.player_list[self.currPlayer]['color']
-                    self.player_list[self.currPlayer]['unassigned'] -= 2
-                    for i in start_cell.neighbors:
+                    self.player_list[self.currPlayer]['unassigned'] -= numArmy
+                    numArmy = self.player_list[self.currPlayer]['unassigned']
+                    neighbors = list(start_cell.neighbors)
+                    random.shuffle(neighbors)
+                    while len(neighbors) > 0:
+                        i = neighbors.pop()
                         neighbor = self.vg.cells[i]
-                        valid = neighbor.owner in [self.currPlayer,-1]
-                        if neighbor.name in acceptable and valid:
-                            if self.player_list[self.currPlayer]['unassigned'] > 0:
+                        if neighbor.name in acceptable and numArmy > 0:
+                            changed = neighbor.changeOwner(self.currPlayer)
+                            if changed:
                                 neighbor.value+=1
+                                numArmy -= 1
                                 neighbor.owner_color = self.player_list[self.currPlayer]['color']
                                 self.player_list[self.currPlayer]['unassigned'] -= 1
                 
@@ -142,7 +151,7 @@ if __name__ == "__main__":
     splash.show()
     alphorn = QtGui.QSound('alph_3.m4a')
     alphorn.play()
-    time.sleep(2)
+    time.sleep(.2)
     splash.close()
     
     riskWin = RiskGUI()    

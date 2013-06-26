@@ -8,7 +8,7 @@ import random
 #from pyhull.convex_hull import ConvexHull
 #from pyhull.voronoi import VoronoiTess
 
-from voronoicell import VoronoiCell
+from territory import Territory
 
 from delaunay import Delaunay
 from delaunay import Triangle
@@ -46,7 +46,7 @@ class VoronoiGraph():
         #adj_list = self._create_adj_matrix() # only needed in pyhull version
         self.cells = []
         for i in range(self.N):
-            theCell = VoronoiCell()
+            theCell = Territory()
             theCell.id = i
             theCell.center = self.vor.points[i]
             cleanVerts = list(self.vor.regions[i]) #list of indices into vetex array
@@ -74,8 +74,7 @@ class VoronoiGraph():
         #draw army text
         for cell in self.cells:
             if cell.value > 0:
-                mpl_axis.text(cell.center[0],cell.center[1],str(cell.value),color=cell.owner_color)
-                print cell.owner_color
+                mpl_axis.text(cell.center[0],cell.center[1],str(cell.value),color='k')
       
     def draw_delaunay(self,mpl_axis):
         #plot the delaunay graph, simplices are triangles
