@@ -23,6 +23,7 @@ class Territory(VoronoiCell):
         self.owner = -1
         self.owner_color = (0,0,0)
         self.value=0 #number of armies
+        self.color = (0,0,0)
 
     #find the VoronoiCell containg (x,y)
     def contains(self,pos):

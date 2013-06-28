@@ -90,11 +90,13 @@ class RiskGUI(QtGui.QMainWindow):
             pass
     
     def start_newgame(self):
+            start = time.time()
             world = WorldCreator()
             seed=327
             np.random.seed(seed=seed)
             random.seed(seed)
-            world.createPangea(numCells=600,relax=1)
+            
+            world.createPangea(numCells=800,relax=1)
             world.createOceans()
             world.createMountains(mountainRatio=0.006,meanSize=3)
             world.createForests(forestRatio=0.07)
@@ -103,6 +105,9 @@ class RiskGUI(QtGui.QMainWindow):
             world.createArctic_v2()
             world.erodeTinyIslands()
             
+            end = time.time()
+            print end - start
+    
             self.vg = world.vg
             self.vgwidget.vg=self.vg
             self.vgwidget.controller = self
@@ -120,12 +125,13 @@ class RiskGUI(QtGui.QMainWindow):
             print order
             for playerNum in order:
                 if playerNum == 0: #non-NPC
-                    self.currPlayer=playerNum
+                    pass
+                    '''self.currPlayer=playerNum
                     QtGui.QMessageBox.information(None,'Test1','Place your initial troops')
                     app=QtGui.QApplication.instance()
                     self.deployMode = True
                     while self.player_list[self.currPlayer]['unassigned'] > 0:
-                        app.processEvents() #wait until user selects tiles
+                        app.processEvents() #wait until user selects tiles'''
                 else:
                     self.currPlayer=playerNum
                     self.selectTerritory()
@@ -141,15 +147,15 @@ class RiskGUI(QtGui.QMainWindow):
 
 
 if __name__ == "__main__":   
-
+    
     app=QtGui.QApplication.instance() # checks if QApplication already exists 
     if not app: # create QApplication if it doesnt exist 
         app = QtGui.QApplication(sys.argv)
-    pixmap = QtGui.QPixmap("risk.jpg")
+    pixmap = QtGui.QPixmap(r"/resources/risk.jpg")
     splash = QtGui.QSplashScreen(pixmap,
             QtCore.Qt.FramelessWindowHint|QtCore.Qt.WindowStaysOnTopHint)
     splash.show()
-    alphorn = QtGui.QSound('alph_3.m4a')
+    alphorn = QtGui.QSound(r'/resources/alph_3.m4a')
     alphorn.play()
     time.sleep(.2)
     splash.close()
@@ -157,7 +163,6 @@ if __name__ == "__main__":
     riskWin = RiskGUI()    
     riskWin.show()
     app.setActiveWindow(riskWin)
-    
     riskWin.start_newgame()
-    
+   
     sys.exit(app.exec_())

@@ -15,6 +15,11 @@ from delaunay import Triangle
 from delaunay import ConvexHull
 from voronoi import Voronoi
 
+#from c_delaunay import Delaunay
+#from c_delaunay import Triangle
+#from c_delaunay import ConvexHull
+#from c_voronoi import Voronoi
+
 
 biomes = {  'water':(0.3,0.4,0.7),
             'land':(238/255.0,207/255.0,161/255.0),
@@ -136,7 +141,7 @@ class VoronoiGraph():
             mpl_axis.text(item[0],item[1],str(i))
             
 if __name__ == "__main__":
-    n=500
+    n=800
     #np.random.seed(seed=1234)
     x = np.random.random(n)
     y = np.random.random(n)
@@ -178,10 +183,11 @@ if __name__ == "__main__":
     print i,vg.N
 
     vg.draw_voronoi(ax)
-    vg.draw_delaunay(ax)
+    #vg.draw_hull(ax)
+    #vg.draw_delaunay(ax)
     ax.plot(x,y,'ro',markersize=3)
-    plt.xlim(0,1)
-    plt.ylim(0,1)
+    #plt.xlim(0,1)
+    #plt.ylim(0,1)
     plt.show()
     
     

@@ -41,7 +41,10 @@ class WorldCreator():
         y = np.random.random(numCells)
         sites = zip(x,y)
         sites.sort()
+        #import cProfile
         self.vg = VoronoiGraph(sites)
+        #self.vg = cProfile.runctx('VoronoiGraph(sites)',{'VoronoiGraph':VoronoiGraph},{'sites':sites})
+        
         #perform relax steps of Lloyd relaxation
         for i in range(relax):
             x=np.zeros(numCells)

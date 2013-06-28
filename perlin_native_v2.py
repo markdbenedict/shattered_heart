@@ -4,7 +4,8 @@ from PIL import Image
 import numpy as np
 
 
-    
+
+#freq should be a float
 def noise(freq,octs,size):
     #setup randomized hash table of directions
     perm = np.arange(size)
