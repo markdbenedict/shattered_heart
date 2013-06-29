@@ -10,7 +10,7 @@ class VoronoiCell():
         self.vertices = np.array((np.inf,np.inf))
         self.center = np.array((np.inf,np.inf))
         self.hull_point=False
-        self.color = (0.5,0.7,0.7)#np.random.rand(3)
+        self.color = (128,200,200)#np.random.rand(3)
 
     #find the VoronoiCell containg (x,y)
     def contains(self,pos):
