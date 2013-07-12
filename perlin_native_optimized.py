@@ -44,8 +44,7 @@ def noise(freq,octs,size):
     return valFBM
 
 
-def test_perlin(size = 256,display=True):
-    freq, octs= 1/32.0, 2
+def test_perlin(size = 256,display=True,freq=1/32.0, octs= 2):
     data=noise(freq, octs,size)
     
     if display:
