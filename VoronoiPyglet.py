@@ -63,7 +63,7 @@ class MapWindow(pyglet.window.Window):
                 
         self.unit_batch = pyglet.graphics.Batch()
         self.unit_list=[]
-        for i in range(5):
+        for i in range(15):
             x = random.randint(0,self.width)
             y = random.randint(0,self.height)
             unit = Unit('resources/test_sprite.png',x=x,y=y,batch=self.unit_batch)
@@ -143,6 +143,8 @@ class MapWindow(pyglet.window.Window):
         if self.selected_unit:
             self.selected_unit.x +=dx
             self.selected_unit.y +=dy
+            self.selected_unit.sdx =dx
+            self.selected_unit.sdy =dy
     
     def update_pos(self, dt):
         for unit in self.unit_list:
