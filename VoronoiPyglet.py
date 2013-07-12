@@ -7,6 +7,7 @@ import numpy as np
 import time
 
 from pyglet.gl import *
+from Unit import Unit
 
 biomes = {  'water':(0.3,0.4,0.7),
             'land':(238/255.0,207/255.0,161/255.0),
@@ -60,10 +61,22 @@ class MapWindow(pyglet.window.Window):
         
         self.refresh_draw_list()
                 
+        self.unit_batch = pyglet.graphics.Batch()
+        self.unit_list=[]
+        for i in range(5):
+            x = random.randint(0,self.width)
+            y = random.randint(0,self.height)
+            unit = Unit('resources/test_sprite.png',x=x,y=y,batch=self.unit_batch)
+            unit.sdx = random.randint(-5,5)
+            unit.sdy = random.randint(-5,5)
+            self.unit_list.append(unit)
+        self.selected_unit = None
+                
         self.width = img.width*3
         self.height = img.height*3
         self.set_visible()
     
+        pyglet.clock.schedule_interval(self.update_pos,1/30.0)
         
     def on_draw(self ):
         start = time.time()
@@ -90,6 +103,9 @@ class MapWindow(pyglet.window.Window):
         for vertex_array in self.line_list:
             vertex_array.draw(GL_LINE_LOOP)
         
+        #draw units
+        self.unit_batch.draw()
+        
         print 'draw time = ',time.time()-start
         
                 
@@ -114,14 +130,36 @@ class MapWindow(pyglet.window.Window):
         
     def on_mouse_press(self,x, y, button, modifiers):
         print 'mouse pressed',x,y,button
-        pass
+        
+        for unit in self.unit_list:
+            if unit.hit_test(x,y):    
+                self.selected_unit = unit
 
     def on_mouse_release(self,x,y,button,modifiers):
-        pass
+        self.selected_unit = None
     
     def on_mouse_drag(self,x,y,dx,dy,buttons,modfiers ):
         print "mouse drag",x,y,dx,dy
-        pass
+        if self.selected_unit:
+            self.selected_unit.x +=dx
+            self.selected_unit.y +=dy
+    
+    def update_pos(self, dt):
+        for unit in self.unit_list:
+            unit.x+=unit.speed*unit.sdx*dt
+            unit.y+=unit.speed*unit.sdy*dt
+            
+            #perform 2D screen wrapping
+            if unit.x - unit.width/2 > self.width:
+                unit.x -= unit.width +self.width
+            elif unit.x + unit.width/2 < 0:
+                unit.x += unit.width +self.width
+            if unit.y - unit.height/2 > self.height:
+                unit.y -= unit.height +self.height
+            elif unit.y + unit.height/2 < 0:
+                unit.y += unit.height +self.height
+                
+            
     
     
     
